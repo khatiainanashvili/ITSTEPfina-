@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+
+ 
+{% load static %}
+
+{% block title %} <title>Register Page</title> {% endblock %}
+
+{% block content %}
+        
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Register" class="add-file-btn" style="background-color: rgb(35, 110, 123);">
+</form>
+
+
+{% endblock %}

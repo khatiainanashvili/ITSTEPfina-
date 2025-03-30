@@ -1,0 +1,9 @@
+<h2>Do You want this book</h2>
+<p>Book: {{ book.title }}</p>
+<p>Price: ${{ book.price }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Buy</button>
+</form>
+<a href="{% url 'home' %}">Cancel</a>

@@ -1,0 +1,20 @@
+<h1>Profile of {{ author.name }}</h1>
+
+<div>
+    <img src="{{ author.avatar.url }}" alt="{{ author.name }}" style="width: 100px; height: 100px;">
+    <p>{{ author.name }}</p>
+    <p>{{ author.user.email }}</p>
+</div>
+
+<h2>Blogs by {{ author.name }}</h2>
+{% if blogs_by_author %}
+    <ul>
+        {% for blog in blogs_by_author %}
+            <li>
+                <a href="{% url 'blog_detail' blog.id %}">{{ blog.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>This author has no blogs yet.</p>
+{% endif %}

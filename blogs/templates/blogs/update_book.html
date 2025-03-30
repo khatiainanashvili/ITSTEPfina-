@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+
+{% block title %}
+<title>Update Book</title>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container" style="flex-direction: column;">
+    <a href="{{ request.META.HTTP_REFERER }}" class="go-back">Go Back</a>
+
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h3>Update Book Info</h3>
+        {{ book_form.as_p }}
+
+        <hr>
+
+        <input type="submit" name="update_collection" value="Update Book" class="add-file-btn">
+    </form>
+</div>
+{% endblock %}

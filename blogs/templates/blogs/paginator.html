@@ -1,0 +1,45 @@
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+
+      {% if books.has_previous %}
+          <li class="page-item">
+              <a class="page-link" href="?page=1">&laquo; First</a>
+          </li>
+          <li class="page-item">
+              <a class="page-link" href="?page={{ books.previous_page_number }}">Previous</a>
+          </li>
+      {% else %}
+          <li class="page-item disabled">
+              <span class="page-link">Previous</span>
+          </li>
+      {% endif %}
+
+      <!-- Page Numbers -->
+      {% for num in page_range %}
+          {% if books.number == num %}
+              <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+              </li>
+          {% else %}
+              <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+          {% endif %}
+      {% endfor %}
+
+      <!-- Next & Last Buttons -->
+      {% if books.has_next %}
+          <li class="page-item">
+              <a class="page-link" href="?page={{ books.next_page_number }}">Next</a>
+          </li>
+          <li class="page-item">
+              <a class="page-link" href="?page={{ books.paginator.num_pages }}">Last &raquo;</a>
+          </li>
+      {% else %}
+          <li class="page-item disabled">
+              <span class="page-link">Next</span>
+          </li>
+      {% endif %}
+
+  </ul>
+</nav>
