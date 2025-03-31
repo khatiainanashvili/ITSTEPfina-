@@ -25,17 +25,7 @@ class Blogs(models.Model):
 
     
     
-def create_author_for_user(sender, instance, created, **kwargs):
-    if created:
-        Author.objects.create(user=instance, name=instance.username)
 
-
-
-@receiver(post_save, sender=User)
-
-def save_author(sender, instance, **kwargs):
-    if hasattr(instance, 'author'):
-        instance.author.save()
 
 class Comment(models.Model):
     user = models.ForeignKey(Author, on_delete=models.CASCADE)
@@ -48,3 +38,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+    
+
+
+
+

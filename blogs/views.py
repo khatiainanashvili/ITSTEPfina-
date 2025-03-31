@@ -89,7 +89,6 @@ def blog_details(request, id):
 @login_required
 def update_blog(request, id):
     blog = get_object_or_404(Blogs, id=id)
-    # Check if the current user is one of the blog's authors
     if not blog.authors.filter(user=request.user).exists():
         messages.error(request, "You do not have permission to update this blog.")
         return redirect('blog_detail', id=blog.id)
@@ -116,7 +115,6 @@ def delete_blog(request, id):
     if request.method == 'POST':
         blog.delete()
         messages.success(request, "Blog deleted successfully.")
-        # Redirect to a blog list page or home page after deletion.
         return redirect('blog_list')
     
     return render(request, 'blogs/confirm_delete_blog.html', {'blog': blog})
