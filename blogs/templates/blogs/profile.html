@@ -1,21 +1,49 @@
-
-
-
-{% extends 'main.html' %}   
- 
-{% block title %} <title>Profile</title> {% endblock %}
-
-
+{% extends 'index.html' %}
 
 {% block content %}
+<h1>Profile of {{ author.name }}</h1>
+<div class="profile-container">
+<div class="">
+  <div>
+    <img src="{{ author.avatar.url }}" alt="{{ author.name }}" style="width: 100px; height: 100px;">
+    <p>{{ author.name }}</p>
+    <p>{{ author.user.email }}</p>
+  </div>
 
-<div class="profile_page">
-<button class="add-file-btn">
-    <a href="{% url 'update' %}" style="display: flex; justify-content: center; align-items: center; gap: 1rem;">
-        Update profile
-        <span class="material-icons md-light">manage_accounts</span>
-    </a>
-</button>
+  <h3>My Blogs</h3>
+  <ul class="my-blog-container">
+
+    {% for blog in blogs %}
+      
+        <a href="{% url 'blog_detail' blog.id %}" class="my_blogs ">
+          <li>
+          {{ blog.title }}
+        </li>
+        </a>
+  
+    {% empty %}
+      <p>No blogs yet.</p>
+    {% endfor %}
+  </ul>
+
+</div>
+
+  <div class="container mt-5 profile-settings-profile">
+    <h2>Update Profile</h2>
+    <a href="{% url 'password_change' %}" class="change_password button">Change Password</a>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        {{ profile_form.as_p }}
+        <div class="">
+    
+          <button type="submit">Save changes</button>
+
+        </div>
+        
+    </form>
+  
+</div>
 
 </div>
 

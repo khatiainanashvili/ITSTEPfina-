@@ -7,21 +7,29 @@
 {% block content %}
 
 
-<div class="container d-flex flex-wrap">
-    <div class="">
-    {% for genre in genres %}
-    <a href="{{ request.path }}?query={{ genre }}">
-      <h5> {{ genre }}  {{ genre.count }} </h5>
-    </a>
-    
-  {% endfor %}
-  <a href="{{ request.path }}">
-    <h5> All </h5>
-</a>
-</div>
-<a href="{% url 'add_book' %}" type="button" class=" btn btn-primar text-decoration-none d-flex"> Add New Book</a>
 
-{% include 'blogs/book_list.html' %}
+<div class="forms-container">
+  <div class="">
+    <form method="GET" class="search-form">
+      <input type="text" name="query" placeholder="Search blogs..." value="{{ request.GET.query }}">
+      <button type="submit"><span class="material-icons md-light">search</span> Search</button>
+    </form>
+  </div>
+</div>
+
+{% include 'blogs/blog_list.html' %}
+
+{% include 'blogs/paginator.html' %}
+
+
+{% if request.user.is_authenticated %}
+<h3>Add a new blog</h3>
+<form method="POST" enctype="multipart/form-data" class="new-blog-form">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Add Blog</button>
+</form>
+{% endif %}
 
 </div>
 {% endblock %}

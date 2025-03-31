@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% block title %}<title>Update Blog</title>{% endblock %}
+
+{% block content %}
+  <h2>Update Blog: {{ blog.title }}</h2>
+  <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+{% endblock %}

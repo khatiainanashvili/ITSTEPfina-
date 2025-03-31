@@ -1,14 +1,26 @@
 from django import forms
-from .models import Books
+from .models import Author, Blogs, User
 
 
-class BookForm(forms.ModelForm):
+class BlogForm(forms.ModelForm):
     class Meta:
-        model = Books
+        model = Blogs
         fields = ['title', 'description']
 
 class BookUpdateForm(forms.ModelForm):
     class Meta: 
-        model = Books
+        model = Blogs
         fields = ['title', 'description']
+
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = ['avatar']
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username'] 
 

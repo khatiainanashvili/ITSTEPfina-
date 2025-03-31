@@ -1,43 +1,70 @@
 {% load static %}
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<nav class="navbar navbar-expand-lg bg-body-tertiary header-nav">
     
-    <a class="nav-link active" aria-current="page" href="{% url 'home' %}"><h2>Books</h2></a>
-    <ul class="d-flex m-5 ">
+    <a class="nav-link active" aria-current="page" href="{% url 'home' %}"><h2>Blogs</h2></a>
+    <ul class="prof">
         {% if request.user.is_authenticated %}
     
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'logout'%}">LogOut</a>
-        </li>
-        <li> <a href="{% url 'password_change' %}">Change Password</a></li>
+      
        {% else %}
-        <li class="nav-item mx-5 ">
-        <a class="nav-link active" aria-current="page" href="{% url 'login'%}">LogIn</a>
+        <li class="nav-item ">
+        <a class="nav-link active mx-3" aria-current="page" href="{% url 'login'%}">LogIn</a>
         </li>
-        <li class="nav-item mx-5">
-            <a class="nav-link active" aria-current="page" href="{% url 'register'%}">Register</a>
+        <li class="nav-item ">
+            <a class="nav-link active mx-3" aria-current="page" href="{% url 'register'%}">Register</a>
         </li>
      
      
       
-  {% endif %}
+    {% endif %}
 
-  <div class="dropdown">
+  <!-- <div class="dropdown">
+
     <div class="">
 
-      <a href="{% if request.user.is_authenticated %}{% url 'profile' request.user.id %}{% else %}# {% endif %}">
+    <a href="{% url 'profile' %}">
         Profile
       <img src="{{ request.user.author.avatar.url }}" alt="" style="width: 2.5em; height: 2.5em; border-radius: 100%;">
     </a>  
     <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
       <p>{{request.user.username}} <span class="material-icons md-light">arrow_drop_down</span> </p>
     </a>
-
+    </div>
   
+  </div> -->
+
+  {% if request.user.is_authenticated %}
+
+        <li class="nav-item">
+          <a class="nav-link active profile" aria-current="page" href="{% url 'profile' %}"><span class="Profile ">Profile </span></a>
+        </li>
+  <div class="">
+    <div class="dropdown">
+
+    <a href="{% url 'profile' %}">
+      <img src="{{ request.user.author.avatar.url }}" alt="" style="width: 2.5em; height: 2.5em; border-radius: 100%;">
+    </a>  
+    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
+      <p>{{request.user.username}}  </p>
+    </a>
   </div>
+
+    <div class="dropdown-menu">
+   
+      <a  href="{% url 'update_profile'  %}">settings <span class="material-icons md-light">manage_accounts</span></a>
+  
+      <a  href="{% url 'logout' %}">LogOut <span class="material-icons md-light">logout</span></a>
+      
+    </div>
+
+  </div>
+  {% else %}
+    
+    
+
+  {% endif %}
     </ul>
-    <form class="d-flex" role="search">
-      <input name = "query" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-success" type="submit">Search</button>
-    </form>
+  
   </nav>
+

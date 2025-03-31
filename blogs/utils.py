@@ -1,4 +1,4 @@
-from django.core.paginator import Page, Paginator, PageNotAnInteger, EmptyPage
+from django.core.paginator import Page, Paginator
 
 class CustomPaginator(Paginator):
 
@@ -7,3 +7,4 @@ class CustomPaginator(Paginator):
         start = max(current_page - range_size, 1)
         end = min(current_page + range_size, self.num_pages) + 1
         return range(start, end)
+    

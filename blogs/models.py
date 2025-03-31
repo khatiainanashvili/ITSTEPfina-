@@ -12,12 +12,13 @@ class Author(models.Model):
         return self.name
 
 
-from django.contrib.auth.models import User
-
-class Books(models.Model):
+class Blogs(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField()
     authors = models.ManyToManyField("Author")
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    class Meta:
+        ordering = ['-created']
 
     def __str__(self):
         return self.title
@@ -28,6 +29,8 @@ def create_author_for_user(sender, instance, created, **kwargs):
     if created:
         Author.objects.create(user=instance, name=instance.username)
 
+
+
 @receiver(post_save, sender=User)
 
 def save_author(sender, instance, **kwargs):
@@ -36,7 +39,7 @@ def save_author(sender, instance, **kwargs):
 
 class Comment(models.Model):
     user = models.ForeignKey(Author, on_delete=models.CASCADE)
-    blogs = models.ForeignKey(Books, on_delete=models.CASCADE)
+    blogs = models.ForeignKey(Blogs, on_delete=models.CASCADE)
     body = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 

@@ -1,11 +1,8 @@
 from tokenize import Comment
-from urllib import request
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Books
-from .forms import BookForm, BookUpdateForm
+from .forms import BlogForm, ProfileForm, UserUpdateForm
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, EmptyPage
-from .models import Books, Author, Comment
-from .forms import BookForm
+from .models import Blogs, Author, Comment
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,47 +11,57 @@ def home(request):
     blogs_author = Author.objects.all() 
 
     query = request.GET.get('query', "").strip()  
-    books_list = Books.objects.filter(title__icontains=query) if query else Books.objects.all()
+    blog_list = Blogs.objects.filter(title__icontains=query) if query else Blogs.objects.all()
 
-    paginator = Paginator(books_list, 3)  
+    paginator = Paginator(blog_list, 3)  
     page_number = request.GET.get('page', 1)
 
     try:
-        books = paginator.page(page_number)
+        blogs = paginator.page(page_number)
     except PageNotAnInteger:
-        books = paginator.page(1)
+        blogs = paginator.page(1)
     except EmptyPage:
-        books = paginator.page(paginator.num_pages)
-
+        blogs = paginator.page(paginator.num_pages)
+    if request.method == "POST":
+        form = BlogForm(request.POST, request.FILES) 
+        if form.is_valid():
+            blog = form.save(commit=False) 
+            author, created = Author.objects.get_or_create(user=request.user, defaults={"name": request.user.username})
+            blog.save() 
+            blog.authors.add(author)
+            return redirect('home')
+    else:
+        form = BlogForm()
 
     context = {
-        "books": books,
+        "blogs": blogs,
         "blogs_author": blogs_author,  
-        "page_range": paginator.page_range  
+        "page_range": paginator.page_range,
+        "form": form,  
     }
 
     return render(request, 'blogs/home.html', context)
 
-def add_book(request):
+def add_blog(request):
     if request.method == "POST":
-        form = BookForm(request.POST, request.FILES) 
+        form = BlogForm(request.POST, request.FILES) 
         if form.is_valid():
-            book = form.save(commit=False) 
+            blog = form.save(commit=False) 
             
             author, created = Author.objects.get_or_create(user=request.user, defaults={"name": request.user.username})
-            book.save() 
-            book.authors.add(author)
+            blog.save() 
+            blog.authors.add(author)
             return redirect('home')
     else:
-        form = BookForm()
+        form = BlogForm()
         
-    return render(request, 'blogs/add_book.html', {'form': form})
+    return render(request, 'blogs/add_blog.html', {'form': form})
 
 
 def blog_details(request, id):
-    blog = get_object_or_404(Books, id=id)
+    blog = get_object_or_404(Blogs, id=id)
     blog_comments = blog.comment_set.all()
-    
+    is_author = request.user.is_authenticated and blog.authors.filter(user=request.user).exists()
     if request.method == 'POST':
         if not request.user.is_authenticated:
             messages.info(request, 'You need to log in to post a comment.')
@@ -72,46 +79,49 @@ def blog_details(request, id):
     
     return render(request, 'blogs/blog_detail.html', {
         'blog': blog,
-        'blog_comments': blog_comments
+        'blog_comments': blog_comments,
+        'is_author': is_author
     })
 
 
 
 
-def delete_book(request, id):
-    book = Books.objects.get(id=id)
-
+@login_required
+def update_blog(request, id):
+    blog = get_object_or_404(Blogs, id=id)
+    # Check if the current user is one of the blog's authors
+    if not blog.authors.filter(user=request.user).exists():
+        messages.error(request, "You do not have permission to update this blog.")
+        return redirect('blog_detail', id=blog.id)
+    
     if request.method == 'POST':
-        book.delete()
-
-        return redirect('home')
-    return render(request, "blogs/delete_book.html", {'book' : book})
-
-
-def update_book(request, id):
-    book = get_object_or_404(Books, id=id)
-    book_form = BookUpdateForm(instance=book)
-
-    if request.method == "POST":
-        book_form = BookUpdateForm(request.POST, instance=book)
-
-        if book_form.is_valid():
-            book_form.save()
-            return redirect('book_detail', id=id)  
-        
-    return render(request, 'blogs/update_book.html', {
-        'book_form': book_form,
-        'blogs': book
-    })
+        form = BlogForm(request.POST, instance=blog)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog updated successfully.")
+            return redirect('blog_detail', id=blog.id)
+    else:
+        form = BlogForm(instance=blog)
+    
+    return render(request, 'blogs/update_blog.html', {'form': form, 'blog': blog})
 
 
+@login_required
+def delete_blog(request, id):
+    blog = get_object_or_404(Blogs, id=id)
+    if not blog.authors.filter(user=request.user).exists():
+        messages.error(request, "You do not have permission to delete this blog.")
+        return redirect('blog_detail', id=blog.id)
+    
+    if request.method == 'POST':
+        blog.delete()
+        messages.success(request, "Blog deleted successfully.")
+        # Redirect to a blog list page or home page after deletion.
+        return redirect('blog_list')
+    
+    return render(request, 'blogs/confirm_delete_blog.html', {'blog': blog})
 
-@login_required(login_url='/login/')
-def profile(request, id):
-    author = Author.objects.get(id=int(id))
-    headline= "My Blogs"
-    context = {"author": author, "headline": headline}
-    return render(request, "blogs/profile.html", context)
+
 
 
 def delete_comment(request, comment_id):
@@ -128,7 +138,7 @@ def delete_comment(request, comment_id):
 
 @login_required(login_url='/login/')
 def delete_blog(request, id):
-    blog = get_object_or_404(Books, id=id)
+    blog = get_object_or_404(Blogs, id=id)
     
     user = request.user
     if request.method == 'POST':
@@ -140,10 +150,63 @@ def delete_blog(request, id):
 
 def author_profile(request, id):
     author = get_object_or_404(Author, id=id)
-    blogs_by_author = Books.objects.filter(authors=author)
+    blogs_by_author = Blogs.objects.filter(authors=author)
 
     context = {
         'author': author,
         'blogs_by_author': blogs_by_author
     }
     return render(request, 'blogs/author_profile.html', context)
+
+
+@login_required
+def profile(request):
+    author = get_object_or_404(Author, user=request.user)
+    blogs = Blogs.objects.filter(authors=author)
+    user_form = UserUpdateForm(request.POST, instance=request.user)
+    profile_form = ProfileForm(request.POST, request.FILES, instance=author)
+
+    return render(request, 'blogs/profile.html', {
+        'author': author,
+        'blogs': blogs,
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+
+@login_required
+def update_profile(request):
+    author = get_object_or_404(Author, user=request.user)
+    
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=author)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save() 
+            profile_form.save()  
+            return redirect('profile')  
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileForm(instance=author)
+        
+    return render(request, 'blogs/update_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+
+
+@login_required
+def delete_comment(request, id):
+    comment = get_object_or_404(Comment, id=id)
+
+    if request.user != comment.user.user:
+        messages.error(request, "You do not have permission to delete this comment.")
+        return redirect('blog_detail', id=comment.blogs.id)
+    
+    if request.method == 'POST':
+        blog_id = comment.blogs.id
+        comment.delete()
+        messages.success(request, "Comment deleted successfully.")
+        return redirect('blog_detail', id=blog_id)
+
+    return render(request, 'blogs/confirm_delete_comment.html', {'comment': comment})
